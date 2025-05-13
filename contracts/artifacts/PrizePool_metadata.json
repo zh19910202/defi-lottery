@@ -1,0 +1,522 @@
+{
+	"compiler": {
+		"version": "0.8.30+commit.73712a01"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "_lottery",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "_feeRate",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "nonpayable",
+				"type": "constructor"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					}
+				],
+				"name": "FeeCollected",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "oldFeeRate",
+						"type": "uint256"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "newFeeRate",
+						"type": "uint256"
+					}
+				],
+				"name": "FeeRateUpdated",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "previousOwner",
+						"type": "address"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "newOwner",
+						"type": "address"
+					}
+				],
+				"name": "OwnershipTransferred",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "winner",
+						"type": "address"
+					},
+					{
+						"indexed": true,
+						"internalType": "uint256",
+						"name": "lotteryId",
+						"type": "uint256"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					}
+				],
+				"name": "PrizeClaimed",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "vault",
+						"type": "address"
+					}
+				],
+				"name": "VaultSet",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "oldYieldAggregator",
+						"type": "address"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "newYieldAggregator",
+						"type": "address"
+					}
+				],
+				"name": "YieldAggregatorSet",
+				"type": "event"
+			},
+			{
+				"inputs": [],
+				"name": "MAX_FEE_RATE",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "addToPrizePool",
+				"outputs": [],
+				"stateMutability": "payable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "lotteryId",
+						"type": "uint256"
+					}
+				],
+				"name": "claimPrize",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "feeRate",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "getPrizePoolAmount",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "lottery",
+				"outputs": [
+					{
+						"internalType": "contract ILottery",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "owner",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "renounceOwnership",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "_feeRate",
+						"type": "uint256"
+					}
+				],
+				"name": "setFeeRate",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "_vault",
+						"type": "address"
+					}
+				],
+				"name": "setVault",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "_weth",
+						"type": "address"
+					}
+				],
+				"name": "setWETH",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "_yieldAggregator",
+						"type": "address"
+					}
+				],
+				"name": "setYieldAggregator",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "newOwner",
+						"type": "address"
+					}
+				],
+				"name": "transferOwnership",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "vault",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "weth",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "yieldAggregator",
+				"outputs": [
+					{
+						"internalType": "contract IYieldAggregator",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			}
+		],
+		"devdoc": {
+			"kind": "dev",
+			"methods": {
+				"addToPrizePool()": {
+					"details": "现在已经不再接受ETH，而是接受WETH，所以这个函数会revert"
+				},
+				"claimPrize(uint256)": {
+					"params": {
+						"lotteryId": "The ID of the lottery round to claim prize for"
+					}
+				},
+				"getPrizePoolAmount()": {
+					"returns": {
+						"_0": "The current amount of ETH in the prize pool (in wei)"
+					}
+				},
+				"owner()": {
+					"details": "Returns the address of the current owner."
+				},
+				"renounceOwnership()": {
+					"details": "Leaves the contract without owner. It will not be possible to call `onlyOwner` functions anymore. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby removing any functionality that is only available to the owner."
+				},
+				"setFeeRate(uint256)": {
+					"params": {
+						"_feeRate": "新的费率（以基点表示，例如 500 表示 5%）"
+					}
+				},
+				"setVault(address)": {
+					"params": {
+						"_vault": "The address of the vault"
+					}
+				},
+				"setWETH(address)": {
+					"params": {
+						"_weth": "The address of the WETH token"
+					}
+				},
+				"setYieldAggregator(address)": {
+					"params": {
+						"_yieldAggregator": "The address of the yield aggregator"
+					}
+				},
+				"transferOwnership(address)": {
+					"details": "Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner."
+				}
+			},
+			"stateVariables": {
+				"feeRate": {
+					"return": "The fee rate in basis points",
+					"returns": {
+						"_0": "The fee rate in basis points"
+					}
+				}
+			},
+			"version": 1
+		},
+		"userdoc": {
+			"kind": "user",
+			"methods": {
+				"addToPrizePool()": {
+					"notice": "向奖池添加ETH"
+				},
+				"claimPrize(uint256)": {
+					"notice": "Allows a winner to claim their ETH prize"
+				},
+				"feeRate()": {
+					"notice": "Gets the current fee rate"
+				},
+				"getPrizePoolAmount()": {
+					"notice": "Gets the current prize pool amount in ETH"
+				},
+				"setFeeRate(uint256)": {
+					"notice": "更新奖金费率"
+				},
+				"setVault(address)": {
+					"notice": "Sets the vault address"
+				},
+				"setWETH(address)": {
+					"notice": "Sets the WETH token address"
+				},
+				"setYieldAggregator(address)": {
+					"notice": "Sets the yield aggregator address"
+				}
+			},
+			"version": 1
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"contracts/PrizePool.sol": "PrizePool"
+		},
+		"evmVersion": "prague",
+		"libraries": {},
+		"metadata": {
+			"bytecodeHash": "ipfs"
+		},
+		"optimizer": {
+			"enabled": false,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"@openzeppelin/contracts/access/Ownable.sol": {
+			"keccak256": "0x24e0364e503a9bbde94c715d26573a76f14cd2a202d45f96f52134ab806b67b9",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://e12cbaa7378fd9b62280e4e1d164bedcb4399ce238f5f98fc0eefb7e50577981",
+				"dweb:/ipfs/QmXRoFGUgfsaRkoPT5bxNMtSayKTQ8GZATLPXf69HcRA51"
+			]
+		},
+		"@openzeppelin/contracts/token/ERC20/IERC20.sol": {
+			"keccak256": "0xbbc8ac883ac3c0078ce5ad3e288fbb3ffcc8a30c3a98c0fda0114d64fc44fca2",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://87a7a5d2f6f63f84598af02b8c50ca2df2631cb8ba2453e8d95fcb17e4be9824",
+				"dweb:/ipfs/QmR76hqtAcRqoFj33tmNjcWTLrgNsAaakYwnKZ8zoJtKei"
+			]
+		},
+		"@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol": {
+			"keccak256": "0xc3d946432c0ddbb1f846a0d3985be71299df331b91d06732152117f62f0be2b5",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://4632c341a06ba5c079b51ca5a915efab4e6ab57735b37839b3e8365ff806a43e",
+				"dweb:/ipfs/QmTHT3xHYed2wajEoA5qu7ii2BxLpPhQZHwAhtLK5Z7ANK"
+			]
+		},
+		"@openzeppelin/contracts/utils/Address.sol": {
+			"keccak256": "0x2ccf9d2313a313d41a791505f2b5abfdc62191b5d4334f7f7a82691c088a1c87",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://b3a57d0854b2fdce6ebff933a48dca2445643d1eccfc27f00292e937f26c6a58",
+				"dweb:/ipfs/QmW45rZooS9TqR4YXUbjRbtf2Bpb5ouSarBvfW1LdGprvV"
+			]
+		},
+		"@openzeppelin/contracts/utils/Context.sol": {
+			"keccak256": "0xe2e337e6dde9ef6b680e07338c493ebea1b5fd09b43424112868e9cc1706bca7",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://6df0ddf21ce9f58271bdfaa85cde98b200ef242a05a3f85c2bc10a8294800a92",
+				"dweb:/ipfs/QmRK2Y5Yc6BK7tGKkgsgn3aJEQGi5aakeSPZvS65PV8Xp3"
+			]
+		},
+		"contracts/PrizePool.sol": {
+			"keccak256": "0xc82271b38932a42f2c8506b9df25ee6e7eb05aa162c507fa2c4664c2fa91f49a",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://cdb277b395ab906c9157cdb9472a056772c568a68bbd730a6d1e7beade2f26d5",
+				"dweb:/ipfs/QmZKQdRf7BTi41KQ4kqmN2MhntsPLmMaygsnrMkb6mCC8P"
+			]
+		},
+		"contracts/interfaces/ILottery.sol": {
+			"keccak256": "0x95924713aed588b7484f549ffa77fc4cef59806043a97cccf32e15c4c5062c0a",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://2030ea73834461e9b09772ed695111f4325ebff28d6eb84abb888b9f122eda90",
+				"dweb:/ipfs/QmUeeESxVXiqeDXq8YL9sifZsMhyezty8DoT8hnBSn3kMv"
+			]
+		},
+		"contracts/interfaces/IPrizePool.sol": {
+			"keccak256": "0xa2d76359374e48cb7076bd703ade1c9a70a29eb83a74b90e065d8291661a1a55",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://6f46bfbeb501245955ec359198ff9e2f15102e74ba22861da8eeb26f2caff8bd",
+				"dweb:/ipfs/QmaHjdNjh5KDQJ843DSs9y6kH4bwtZSuXLDFmESWvH25pS"
+			]
+		},
+		"contracts/interfaces/IVault.sol": {
+			"keccak256": "0x77dd49e6feaeeebf2338b3cdccc3fa0b895a020f2d938e16b98d2add68401d88",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://8a2a62ce747b201f0374810f250ba310602cb7287c4271f2372149af7dd61821",
+				"dweb:/ipfs/QmazRfZXvAHbBmPuMk6dXHVn3PLjxNX2kmoSLpjGtkoq55"
+			]
+		},
+		"contracts/interfaces/IWETH.sol": {
+			"keccak256": "0x27f8848e8946463ad1cdee596a84dbe5d68de7582934891e0ca704f0b835285e",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://7c3b3d8432df18a1800afe57a8ebc3fb6049ae657586ef440d29e287180932b3",
+				"dweb:/ipfs/QmPJS2Ep1AnfXGnnGvHvp8mHPzRzwz1szPsPNm1kUfHQrS"
+			]
+		},
+		"contracts/interfaces/IYieldAggregator.sol": {
+			"keccak256": "0x928a5d35122cd0f5c338ee83acb5fa5eb586562fc45600a00d8a26e7dd4209a7",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://48369795a6ec305ebb8923f6e5eaa4c74f45f934f13f64e6fbd40f18198d66ec",
+				"dweb:/ipfs/QmZqHmxCgrxmH2hHrfVN8yujXxp4MrNnXyUuiqNsiMiK5t"
+			]
+		}
+	},
+	"version": 1
+}

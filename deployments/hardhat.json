@@ -1,0 +1,45 @@
+{
+  "timestamp": "2025-05-13T08:41:35.036Z",
+  "network": "hardhat",
+  "contracts": {
+    "Lottery": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+    "VaultShareToken": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+    "Vault": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+    "PrizePool": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+    "YieldAggregator": "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
+    "LotteryRouter": "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707"
+  },
+  "config": {
+    "weth": "0x2D5ee574e710219a521449679A4A7f2B43f046ad",
+    "vrfCoordinator": "0x9DdfaCa8183c41ad55329BdeeD9F6A8d53168B1B",
+    "subscriptionId": "40473456374115908599636799878167985685965739996061897743825189284911781192841",
+    "keyHash": "0x787d74caea10b2b357790d5b5247c2f63d1d91572a9846f780606e4d953677ae",
+    "enableNativePayment": true,
+    "comet": "0x2943ac1216979aD8dB76D9147F64E61adc126e96",
+    "prizePoolRate": 500
+  },
+  "constructorArgs": {
+    "Lottery": [
+      "0x9DdfaCa8183c41ad55329BdeeD9F6A8d53168B1B",
+      "40473456374115908599636799878167985685965739996061897743825189284911781192841",
+      "0x787d74caea10b2b357790d5b5247c2f63d1d91572a9846f780606e4d953677ae",
+      true
+    ],
+    "VaultShareToken": [
+      "Vault Share Token",
+      "VST"
+    ],
+    "Vault": [],
+    "PrizePool": [
+      "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+      500
+    ],
+    "YieldAggregator": [
+      "0x2D5ee574e710219a521449679A4A7f2B43f046ad",
+      "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+      "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+      "0x2943ac1216979aD8dB76D9147F64E61adc126e96"
+    ],
+    "LotteryRouter": []
+  }
+}

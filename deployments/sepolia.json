@@ -1,0 +1,45 @@
+{
+  "network": "sepolia",
+  "timestamp": "2025-05-13T08:43:46.313Z",
+  "contracts": {
+    "Lottery": "0xC8aBb2452110b62d5A63dCa247fc2607bc1Ab088",
+    "VaultShareToken": "0x706Debafcc95d5C9143301f923FBB7B03FA029a9",
+    "Vault": "0x6bcdA120D5390d4984c85a7cA1B4d565a38A390b",
+    "PrizePool": "0x7E5F70b1F978980D8a346522D771293c6d6C05F1",
+    "YieldAggregator": "0x538DE884D7366B687A3B6536e2252F57ebc34Dac",
+    "LotteryRouter": "0x7a86321e6880ED99Aa2CA4e64fDF695f9c152BdD"
+  },
+  "config": {
+    "weth": "0x2D5ee574e710219a521449679A4A7f2B43f046ad",
+    "vrfCoordinator": "0x8103B0A8A00be2DDC778e6e7eaa21791Cd364625",
+    "subscriptionId": "40473456374115908599636799878167985685965739996061897743825189284911781192841",
+    "keyHash": "0x474e34a077df58807dbe9c96d3c009b23b3c6d0cce433e59bbf5b34f823bc56c",
+    "enableNativePayment": false,
+    "comet": "0x2943ac1216979aD8dB76D9147F64E61adc126e96",
+    "prizePoolRate": 500
+  },
+  "constructorArgs": {
+    "Lottery": [
+      "0x8103B0A8A00be2DDC778e6e7eaa21791Cd364625",
+      "40473456374115908599636799878167985685965739996061897743825189284911781192841",
+      "0x474e34a077df58807dbe9c96d3c009b23b3c6d0cce433e59bbf5b34f823bc56c",
+      false
+    ],
+    "VaultShareToken": [
+      "Vault Share Token",
+      "VST"
+    ],
+    "Vault": [],
+    "PrizePool": [
+      "0x6bcdA120D5390d4984c85a7cA1B4d565a38A390b",
+      500
+    ],
+    "YieldAggregator": [
+      "0x2D5ee574e710219a521449679A4A7f2B43f046ad",
+      "0x6bcdA120D5390d4984c85a7cA1B4d565a38A390b",
+      "0x7E5F70b1F978980D8a346522D771293c6d6C05F1",
+      "0x2943ac1216979aD8dB76D9147F64E61adc126e96"
+    ],
+    "LotteryRouter": []
+  }
+}

@@ -1,0 +1,1260 @@
+{
+	"compiler": {
+		"version": "0.8.30+commit.73712a01"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "_vrfCoordinator",
+						"type": "address"
+					},
+					{
+						"internalType": "uint64",
+						"name": "_subscriptionId",
+						"type": "uint64"
+					},
+					{
+						"internalType": "bytes32",
+						"name": "_keyHash",
+						"type": "bytes32"
+					}
+				],
+				"stateMutability": "nonpayable",
+				"type": "constructor"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "have",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "want",
+						"type": "address"
+					}
+				],
+				"name": "OnlyCoordinatorCanFulfill",
+				"type": "error"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "owner",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					}
+				],
+				"name": "FeesWithdrawn",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "uint256",
+						"name": "roundId",
+						"type": "uint256"
+					}
+				],
+				"name": "LotteryAlreadyDrawn",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "requestId",
+						"type": "uint256"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "roundId",
+						"type": "uint256"
+					}
+				],
+				"name": "LotteryTriggered",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "uint256",
+						"name": "roundId",
+						"type": "uint256"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "timestamp",
+						"type": "uint256"
+					}
+				],
+				"name": "NewLotteryRoundStarted",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "previousOwner",
+						"type": "address"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "newOwner",
+						"type": "address"
+					}
+				],
+				"name": "OwnershipTransferred",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "oldPricePool",
+						"type": "address"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "newPrizePool",
+						"type": "address"
+					}
+				],
+				"name": "PrizePoolUpdated",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "oldRouter",
+						"type": "address"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "newRouter",
+						"type": "address"
+					}
+				],
+				"name": "RouterUpdated",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "user",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "weight",
+						"type": "uint256"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "roundId",
+						"type": "uint256"
+					}
+				],
+				"name": "UserWeightUpdated",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "oldVault",
+						"type": "address"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "newVault",
+						"type": "address"
+					}
+				],
+				"name": "VaultUpdated",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": false,
+						"internalType": "address",
+						"name": "winner",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "roundId",
+						"type": "uint256"
+					}
+				],
+				"name": "WinnerSelected",
+				"type": "event"
+			},
+			{
+				"inputs": [],
+				"name": "DRAW_INTERVAL",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "MIN_PRIZE_POOL",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "bytes",
+						"name": "checkData",
+						"type": "bytes"
+					}
+				],
+				"name": "checkUpkeep",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "upkeepNeeded",
+						"type": "bool"
+					},
+					{
+						"internalType": "bytes",
+						"name": "performData",
+						"type": "bytes"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "currentRoundId",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "feeBalance",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "getCurrentRoundId",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "getTotalWeight",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "roundId",
+						"type": "uint256"
+					}
+				],
+				"name": "getTotalWeight",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "roundId",
+						"type": "uint256"
+					}
+				],
+				"name": "isRoundDrawn",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "lastDrawTimestamp",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "roundId",
+						"type": "uint256"
+					}
+				],
+				"name": "lotteryRound",
+				"outputs": [
+					{
+						"components": [
+							{
+								"internalType": "uint256",
+								"name": "requestedId",
+								"type": "uint256"
+							},
+							{
+								"internalType": "address",
+								"name": "winner",
+								"type": "address"
+							},
+							{
+								"internalType": "uint256",
+								"name": "prizeValue",
+								"type": "uint256"
+							},
+							{
+								"internalType": "uint256",
+								"name": "timestamp",
+								"type": "uint256"
+							},
+							{
+								"internalType": "uint256",
+								"name": "randomNumber",
+								"type": "uint256"
+							},
+							{
+								"internalType": "bool",
+								"name": "isClaimed",
+								"type": "bool"
+							},
+							{
+								"internalType": "uint256",
+								"name": "drawTimestamp",
+								"type": "uint256"
+							}
+						],
+						"internalType": "struct ILottery.LotteryRound",
+						"name": "",
+						"type": "tuple"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "nextDrawTimestamp",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "owner",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "bytes",
+						"name": "performData",
+						"type": "bytes"
+					}
+				],
+				"name": "performUpkeep",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "prizePool",
+				"outputs": [
+					{
+						"internalType": "contract IPrizePool",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "requestId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256[]",
+						"name": "randomWords",
+						"type": "uint256[]"
+					}
+				],
+				"name": "rawFulfillRandomWords",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "renounceOwnership",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "router",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "_prizePool",
+						"type": "address"
+					}
+				],
+				"name": "setPrizePool",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "_router",
+						"type": "address"
+					}
+				],
+				"name": "setRouter",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "_vault",
+						"type": "address"
+					}
+				],
+				"name": "setVault",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "roundId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "address",
+						"name": "winner",
+						"type": "address"
+					}
+				],
+				"name": "setWinner",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "newOwner",
+						"type": "address"
+					}
+				],
+				"name": "transferOwnership",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "lotteryId",
+						"type": "uint256"
+					}
+				],
+				"name": "updateIsClaimed",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "user",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "weight",
+						"type": "uint256"
+					}
+				],
+				"name": "updateUserWeight",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "vault",
+				"outputs": [
+					{
+						"internalType": "contract IVault",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "withdrawFees",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"stateMutability": "payable",
+				"type": "receive"
+			}
+		],
+		"devdoc": {
+			"details": "Implements time-weighted user participation and monthly draws via Chainlink Automation",
+			"events": {
+				"LotteryTriggered(uint256,uint256)": {
+					"params": {
+						"requestId": "The unique identifier for the draw request",
+						"roundId": "The ID of the lottery round"
+					}
+				},
+				"WinnerSelected(address,uint256,uint256)": {
+					"params": {
+						"amount": "The amount won by the winner",
+						"roundId": "The ID of the lottery round",
+						"winner": "The address of the winning user"
+					}
+				}
+			},
+			"kind": "dev",
+			"methods": {
+				"checkUpkeep(bytes)": {
+					"params": {
+						"checkData": "Additional data used in checking upkeep"
+					},
+					"returns": {
+						"performData": "Bytes data to be used in performUpkeep",
+						"upkeepNeeded": "Boolean indicating if upkeep is needed"
+					}
+				},
+				"getCurrentRoundId()": {
+					"returns": {
+						"_0": "The ID of the current lottery round"
+					}
+				},
+				"getTotalWeight()": {
+					"returns": {
+						"_0": "当前轮次树的总权重"
+					}
+				},
+				"getTotalWeight(uint256)": {
+					"params": {
+						"roundId": "轮次ID"
+					},
+					"returns": {
+						"_0": "树的总权重"
+					}
+				},
+				"isRoundDrawn(uint256)": {
+					"params": {
+						"roundId": "要检查的轮次ID"
+					},
+					"returns": {
+						"_0": "该轮次是否已经开奖"
+					}
+				},
+				"lotteryRound(uint256)": {
+					"params": {
+						"roundId": "The ID of the lottery round to query"
+					},
+					"returns": {
+						"_0": "The lottery round information"
+					}
+				},
+				"owner()": {
+					"details": "Returns the address of the current owner."
+				},
+				"performUpkeep(bytes)": {
+					"params": {
+						"performData": "Data used in performing upkeep"
+					}
+				},
+				"renounceOwnership()": {
+					"details": "Leaves the contract without owner. It will not be possible to call `onlyOwner` functions anymore. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby removing any functionality that is only available to the owner."
+				},
+				"setPrizePool(address)": {
+					"params": {
+						"_prizePool": "The address of the prize pool contract"
+					}
+				},
+				"setRouter(address)": {
+					"params": {
+						"_router": "路由合约地址"
+					}
+				},
+				"setVault(address)": {
+					"params": {
+						"_vault": "The address of the vault contract"
+					}
+				},
+				"setWinner(uint256,address)": {
+					"params": {
+						"roundId": "轮次ID",
+						"winner": "获奖者地址"
+					}
+				},
+				"transferOwnership(address)": {
+					"details": "Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner."
+				},
+				"updateIsClaimed(uint256)": {
+					"params": {
+						"lotteryId": "The ID of the lottery round to update"
+					}
+				},
+				"updateUserWeight(address,uint256)": {
+					"details": "To be called when deposit or withdraw events occur",
+					"params": {
+						"user": "User address",
+						"weight": "New weight value"
+					}
+				},
+				"withdrawFees()": {
+					"details": "Only callable by contract owner"
+				}
+			},
+			"stateVariables": {
+				"nextDrawTimestamp": {
+					"return": "The timestamp when the next lottery draw will occur",
+					"returns": {
+						"_0": "The timestamp when the next lottery draw will occur"
+					}
+				}
+			},
+			"title": "Lottery Contract",
+			"version": 1
+		},
+		"userdoc": {
+			"events": {
+				"FeesWithdrawn(address,uint256)": {
+					"notice": "Event emitted when fees are withdrawn"
+				},
+				"LotteryAlreadyDrawn(uint256)": {
+					"notice": "Event emitted when tried to draw an already drawn lottery round"
+				},
+				"LotteryTriggered(uint256,uint256)": {
+					"notice": "Emitted when a lottery draw is triggered"
+				},
+				"NewLotteryRoundStarted(uint256,uint256)": {
+					"notice": "Event emitted when a new lottery round is started"
+				},
+				"PrizePoolUpdated(address,address)": {
+					"notice": "Event emitted when prize pool address is updated"
+				},
+				"RouterUpdated(address,address)": {
+					"notice": "Event emitted when router address is updated"
+				},
+				"UserWeightUpdated(address,uint256,uint256)": {
+					"notice": "Event emitted when user weight is updated in the tree"
+				},
+				"VaultUpdated(address,address)": {
+					"notice": "Event emitted when vault address is updated"
+				},
+				"WinnerSelected(address,uint256,uint256)": {
+					"notice": "Emitted when a winner is selected in the lottery"
+				}
+			},
+			"kind": "user",
+			"methods": {
+				"checkUpkeep(bytes)": {
+					"notice": "Checks if upkeep is needed for Chainlink Automation"
+				},
+				"currentRoundId()": {
+					"notice": "Current lottery round ID"
+				},
+				"feeBalance()": {
+					"notice": "Accumulated protocol fees"
+				},
+				"getCurrentRoundId()": {
+					"notice": "Gets the current active lottery round ID"
+				},
+				"getTotalWeight()": {
+					"notice": "获取当前轮次的树的总权重"
+				},
+				"getTotalWeight(uint256)": {
+					"notice": "获取指定轮次的树的总权重"
+				},
+				"isRoundDrawn(uint256)": {
+					"notice": "检查特定轮次是否已经开奖"
+				},
+				"lotteryRound(uint256)": {
+					"notice": "Gets the lottery round information for a specific round ID"
+				},
+				"nextDrawTimestamp()": {
+					"notice": "Gets the timestamp for the next lottery draw"
+				},
+				"performUpkeep(bytes)": {
+					"notice": "Performs the upkeep task if conditions are met"
+				},
+				"router()": {
+					"notice": "路由合约地址"
+				},
+				"setPrizePool(address)": {
+					"notice": "Sets the prize pool contract address"
+				},
+				"setRouter(address)": {
+					"notice": "设置路由合约地址"
+				},
+				"setVault(address)": {
+					"notice": "Sets the vault contract address"
+				},
+				"setWinner(uint256,address)": {
+					"notice": "仅用于测试环境中设置获奖者"
+				},
+				"updateIsClaimed(uint256)": {
+					"notice": "Updates the claimed status of a lottery round"
+				},
+				"updateUserWeight(address,uint256)": {
+					"notice": "Update user weight in the current round's sortition tree"
+				},
+				"vault()": {
+					"notice": "Address of the vault contract"
+				},
+				"withdrawFees()": {
+					"notice": "Allows owner to withdraw accumulated fees"
+				}
+			},
+			"notice": "A decentralized lottery system using Chainlink VRF for random number generation",
+			"version": 1
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"contracts/Lottery.sol": "Lottery"
+		},
+		"evmVersion": "prague",
+		"libraries": {},
+		"metadata": {
+			"bytecodeHash": "ipfs"
+		},
+		"optimizer": {
+			"enabled": false,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"@chainlink/contracts/src/v0.8/automation/AutomationBase.sol": {
+			"keccak256": "0x8c97744adc25cf30d1a2509bff6c0ddc9b36feb75f8e38c85d5c62b8ec773159",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://1c53c8736dacbf8c517c63937d556c3e4873a62f509c5d84b89e32fc5c9c6c2c",
+				"dweb:/ipfs/QmeR6RSce5dTDcPgbwBnG7E8U89716bqsUcv1NeWnX5RJf"
+			]
+		},
+		"@chainlink/contracts/src/v0.8/automation/AutomationCompatible.sol": {
+			"keccak256": "0xce623f3e7fa4addf240032d2817b2b489ac08e79fae14a5cc5850ed3f1acddf8",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://0546b2739f3989b897c5cb591d01211e2db22e1a8578f68117f1a8a692abd85c",
+				"dweb:/ipfs/QmW6guw8uUk2Dq49PWdjeZeEvnDDRg3CVX2BVcVNcT6QNL"
+			]
+		},
+		"@chainlink/contracts/src/v0.8/automation/interfaces/AutomationCompatibleInterface.sol": {
+			"keccak256": "0xf504b227c442cd4ed31b336b7bd15cfcb23220c84c26e750975c7e7d959125aa",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://34e35eb46dfadf12396e92dd970547209dfd99f0ae5b1ec7b5a3e81617f620a1",
+				"dweb:/ipfs/Qmanoi2CDi9MwkP44HosagvewfMEvCMN1YthGRmCexVjwY"
+			]
+		},
+		"@chainlink/contracts/src/v0.8/vrf/VRFConsumerBaseV2.sol": {
+			"keccak256": "0x5a502a5ce16796565815b295bb2d18a0d26d6f23621f733918c971047c6091d7",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://f03385e076f6c2ad534bffe7c655cf259242e0f133f0ebfd56f914c0dde4a3f4",
+				"dweb:/ipfs/QmWkQVSoAoRu1LXQTfDeic9QESjQkjT4G5Kt1VptTaxQDP"
+			]
+		},
+		"@chainlink/contracts/src/v0.8/vrf/interfaces/VRFCoordinatorV2Interface.sol": {
+			"keccak256": "0x619d9d975540d65ef8d6332a67cbd0dda5b0f95b120b8da56695ed50c2f9fc30",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://d13e94e2c3a7e72241c0f10684274b9509d005bc50b247a8a2442b0c12760bc1",
+				"dweb:/ipfs/QmXxTc8ngzwFX9RbSe9Fuso8sSScHDUBfgyTvBcgstJiKt"
+			]
+		},
+		"@openzeppelin/contracts/access/Ownable.sol": {
+			"keccak256": "0x24e0364e503a9bbde94c715d26573a76f14cd2a202d45f96f52134ab806b67b9",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://e12cbaa7378fd9b62280e4e1d164bedcb4399ce238f5f98fc0eefb7e50577981",
+				"dweb:/ipfs/QmXRoFGUgfsaRkoPT5bxNMtSayKTQ8GZATLPXf69HcRA51"
+			]
+		},
+		"@openzeppelin/contracts/utils/Context.sol": {
+			"keccak256": "0xe2e337e6dde9ef6b680e07338c493ebea1b5fd09b43424112868e9cc1706bca7",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://6df0ddf21ce9f58271bdfaa85cde98b200ef242a05a3f85c2bc10a8294800a92",
+				"dweb:/ipfs/QmRK2Y5Yc6BK7tGKkgsgn3aJEQGi5aakeSPZvS65PV8Xp3"
+			]
+		},
+		"@prb/math/src/Common.sol": {
+			"keccak256": "0x8225a3898d2f11f585da1fb82234800e9717fa080dbe53d450fd429a3a632e99",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://2dcbf39ca575f68f32f0d1c66391de94082424956e7585e849813966f8c0fc05",
+				"dweb:/ipfs/QmYvk8vXFDUJHrmqbtutYXfoLomLBosYLyBzuPoYBxsQ42"
+			]
+		},
+		"@prb/math/src/UD60x18.sol": {
+			"keccak256": "0xb98c6f74275914d279e8af6c502c2b1f50d5f6e1ed418d3b0153f5a193206c48",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://a750edde2955f160806a51083a12185fb04e20efca0e3a7ebd127dc1acc049a9",
+				"dweb:/ipfs/QmeAre3mThopoQPB9mSXZq6jck59QZ7JbDFR83urd2SLvp"
+			]
+		},
+		"@prb/math/src/sd1x18/Casting.sol": {
+			"keccak256": "0x5d365f655f01598926c5d4fe5cda277f2cc7736fe38f943c11a32009077ddd5c",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://56b378bd6039819bc12e5f17dabd9492e1410b3281f9df496cf8210539101a11",
+				"dweb:/ipfs/QmcMaE64ZWMg9cFhYxdTuG8nfzeDdNuTRHMMoFXi6tSZGu"
+			]
+		},
+		"@prb/math/src/sd1x18/Constants.sol": {
+			"keccak256": "0xc14cc32061863d83912f9616de86f3c34f1ac58614b7d504c6ce07ee8efdb8e8",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://22483b1282dda6a556b0232f008a5a3296bbfd76b1886e6b72bf351b7c554fab",
+				"dweb:/ipfs/QmYX9cYkrFxBbhZNKsb6uUxtrc2chmAj7vuc7UKRPGMwos"
+			]
+		},
+		"@prb/math/src/sd1x18/Errors.sol": {
+			"keccak256": "0xc3c8b1ab3d19889c356c222a3a2186d45dfc1d3a17b9ad88159bb64ee457baa6",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://84fbe57569246403f778330bd7723018dfcb5f0ec50d7b1d82cc983c94a54bca",
+				"dweb:/ipfs/QmWssAAnovc2EVjt58rTnxraE9B1RMivwTvYCYgpnr6oSE"
+			]
+		},
+		"@prb/math/src/sd1x18/ValueType.sol": {
+			"keccak256": "0xaa9dc7b562faf45264390d80e2ea10c5295bb8a4f10d76261a3f9c04363734c0",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://c6ca36acd15f5cb47cf124ddec289f84e1011f2d29056159e4570435629a3353",
+				"dweb:/ipfs/QmUKdiLmZpAkNCq2TKxrPbQPUhiRFXGfjGSnY1VeHVu4y6"
+			]
+		},
+		"@prb/math/src/sd21x18/Casting.sol": {
+			"keccak256": "0x4a16adddb9ab1f6939dd4567c77205015a11081cb840029b84bbb6fdaf78ee36",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://5003b2f4cd2fc1413da36bc63107c6e83a88d29693e8f97b54f300fa78f9c6d2",
+				"dweb:/ipfs/QmaNJn91NLrZmeeGqnFQV1FTrLVSW852zHyWTrWJ5pf1pd"
+			]
+		},
+		"@prb/math/src/sd21x18/Constants.sol": {
+			"keccak256": "0x501c2d5cfdea9450422182059c8df1cb6a859901a07bd59631c3fa24edcc79d4",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://4669a65001c92919671fd879d33ce0e5030b602a7ba4d36bd2308128d8d1f396",
+				"dweb:/ipfs/QmUC3bJ3qdkCmLMw3WHBcEqvuC4tExT2LXzUhgu5KQ3vi3"
+			]
+		},
+		"@prb/math/src/sd21x18/Errors.sol": {
+			"keccak256": "0xc5422ee47eb139274e538e758fb40177a1ba22c2113ef3b3446102f0150bfe0a",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://a1981e052e9e86e1b0e4e55a057a7af4739aedd4ead2d60e3eaa40fb703594ee",
+				"dweb:/ipfs/QmPK5qSujnyk1R8ues4RhDMy1tRKKyjQ31YJTviTKq7GML"
+			]
+		},
+		"@prb/math/src/sd21x18/ValueType.sol": {
+			"keccak256": "0x532bba888370bed393464412f4ef3462d654802e71c953ad02d078e3d2701092",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://922a4e8dd813602f72d165aa1dfdf2c29b971a2abe73bebca7cd81a32ee2c880",
+				"dweb:/ipfs/QmTBAJnx1r3sZpbQAuTgQtsTtvjZbpDwhCJRzkhzUumbdf"
+			]
+		},
+		"@prb/math/src/sd59x18/Casting.sol": {
+			"keccak256": "0xdf70d8e70c6d6325f3f7eb028c484bc7189ef902f1d4b5b220af2e550bb5fc39",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://0b15bcd36129c5cb163d57a117435afb171182018dd6d1e766a5f49cf1f4b63d",
+				"dweb:/ipfs/QmbjzkMBH4FM2rdxGbx9LQ65wVERijNcu7R9C8dQmH3y4n"
+			]
+		},
+		"@prb/math/src/sd59x18/Constants.sol": {
+			"keccak256": "0x9bcb8dd6b3e886d140ad1c32747a4f6d29a492529ceb835be878ae837aa6cc3a",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://c4045c633e3618e7e90a768d92415b2f20f781fe129b4f4e26fa88f7dbf9201f",
+				"dweb:/ipfs/Qmbet95pizwPno82cJ383wJtgQRSQKESmhVZ1vDrgAu7Si"
+			]
+		},
+		"@prb/math/src/sd59x18/Errors.sol": {
+			"keccak256": "0x0a79c28c85fc8a450b0801ff2e66114eac4ec565819f5d1d8738904658fe33e2",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://9e0d4fd3c998019fb8555d9e26c03bec42a8513bdf4185aeac2da3a000abaebf",
+				"dweb:/ipfs/QmahFJHXcX4RwPxaQbUf6LVZEk8NSpjCV3Eif7i9iqC6Mk"
+			]
+		},
+		"@prb/math/src/sd59x18/Helpers.sol": {
+			"keccak256": "0x208570f1657cf730cb6c3d81aa14030e0d45cf906cdedea5059369d7df4bb716",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://4c78ca900edafa9338d4e3649a55ab0c84f76468d8a22fb945ba6d01e70f8fed",
+				"dweb:/ipfs/QmeP4hQYfNxcATd1FsasdD4ebyu2vrC9K1N68swxUJzzZD"
+			]
+		},
+		"@prb/math/src/sd59x18/Math.sol": {
+			"keccak256": "0xd8e8b51db9b3e2fa31a60f6b8ce4ea0112c3364442ede5992aa0aa7a2c925c84",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://3c56913970e34ee7b142047b21f1856a511cbdc3473b7c50418a8490e19cd462",
+				"dweb:/ipfs/QmfG1F9CBDjPYD7NXora9awFfdpvBMY9SCg5pMLCFRv9tD"
+			]
+		},
+		"@prb/math/src/sd59x18/ValueType.sol": {
+			"keccak256": "0x76597ba64d37d66e0178512bc9bbc1a031a7634c45e5d5c6e9da87f46952dc9d",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://36148899ad874814e9292636fb974d2eec61f1bcc0875ec39cf444d70ba40919",
+				"dweb:/ipfs/QmadUe4kH2FPcdxvhCKy8yiezCvPWor4VcPzqLYSAaGDDb"
+			]
+		},
+		"@prb/math/src/ud21x18/Casting.sol": {
+			"keccak256": "0x3821aa57604f6e5b7c9c5c5cc97a6d71116e673cf3fee5f76fcd42b4cefded65",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://a80399c6b38ab45cc10d0a6683d50340cd89d9a085b6d0dcfb81e7c4e5b3ce09",
+				"dweb:/ipfs/QmWNW2YD2LMkqrpAtJYeeuHN329Rx7mvfmrjsCo1p6akTL"
+			]
+		},
+		"@prb/math/src/ud21x18/Constants.sol": {
+			"keccak256": "0x0997574a1ced6c43bde6d9c9175edc5ad64cbb920a0969a9db68eea543747601",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://c09f03345a6779b002b38ffc3954258accbb2b1d0d5506d42c3bd7f117304f60",
+				"dweb:/ipfs/QmTeBXRCE7H2HpqKUNsZN7Nk3rdBnFmbAUFom3E1PJeGuV"
+			]
+		},
+		"@prb/math/src/ud21x18/Errors.sol": {
+			"keccak256": "0x35a1fb789b90f8c90865884d3023deb17fcca5c7146b5ddef823496d835a5415",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://0af359d07ba25bdc90de7c05ed6216833932caa75d4a02fcfc51ceeaba5a4e80",
+				"dweb:/ipfs/QmavBFw73Xfp1qJiN6P1gk2Dfr8ByWo3dyCPVgDHtko2gq"
+			]
+		},
+		"@prb/math/src/ud21x18/ValueType.sol": {
+			"keccak256": "0x24838b2b1da371b9259d8ee21534a9f0cb5796aba75a4efca2374627952bee25",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://897e6b79308651671c7f3c91a0069e778b47356c9ba3f86e238398ab7f2623af",
+				"dweb:/ipfs/QmZbLw3tJVRZFQnV9jWQUmF43gna841adSG2TAiwDAifGU"
+			]
+		},
+		"@prb/math/src/ud2x18/Casting.sol": {
+			"keccak256": "0x0f3141ed054e7c29dbe1acb4b88b18eb05d60e998fba6b4e503a6799faa356d6",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://b1e2468fc4c458082aaf4aa2e35af9ba3702f207e3c8533dd1e7da11ad605eae",
+				"dweb:/ipfs/QmSm7iRH1eo4cJCwcAiiXWRH9Hn1urSS4tMdbaFbFGuTyL"
+			]
+		},
+		"@prb/math/src/ud2x18/Constants.sol": {
+			"keccak256": "0x29b0e050c865899e1fb9022b460a7829cdee248c44c4299f068ba80695eec3fc",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://cbaef16b662fac235349bcf97bc980dd0cba15d4e6230caae61224cdac8ea6d9",
+				"dweb:/ipfs/QmZQa5XBhi7k3yhtCd8wVpnwW8htfU4sjXxWhxRypMBYkC"
+			]
+		},
+		"@prb/math/src/ud2x18/Errors.sol": {
+			"keccak256": "0x3b27e2a57438cd30d9c130f84aace24d547e5ed58e8689691d7d92ad2db38ddd",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://841cf9fb45443899c6b659300bbf503c3fd2c1a1e83b7f0e28620eed457f7437",
+				"dweb:/ipfs/QmUqg8WscP5yQPw3UMUCWaB9RLU6nryGzseuyhAjNnDc1i"
+			]
+		},
+		"@prb/math/src/ud2x18/ValueType.sol": {
+			"keccak256": "0x975a2e69b48f34a4c0bd80e8a5609ac67b7264c91992c0944f9ebe7b9e3fc9d0",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://65d012521c475295d7e70b7d526fcc0911d0f238ea938719d77251bba00c9b41",
+				"dweb:/ipfs/QmexEvTQCCBPYRWAYnomZX5M7C2EkXQRAXqEYMNUZfazCs"
+			]
+		},
+		"@prb/math/src/ud60x18/Casting.sol": {
+			"keccak256": "0x0803318ddc98b4ba8fbfe70e5ee08d78387fe6ae00982b9960518085a751d7b6",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://2e68a2f780b2e33fa5416eb60f9daa81f014c2591119f4b67bed1217d5530780",
+				"dweb:/ipfs/QmZe7JTWvbfKqMnu4sxUwWCtLcCay9hH71VZUpoFCdENcr"
+			]
+		},
+		"@prb/math/src/ud60x18/Constants.sol": {
+			"keccak256": "0x2b80d26153d3fdcfb3a9ca772d9309d31ed1275f5b8b54c3ffb54d3652b37d90",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://7e3a6673a156f635db94dc176baaa7274db8f9bec4461cd1152596253550ee3b",
+				"dweb:/ipfs/Qmc9zT4kNSbMYaXcnbxNVqmb3P3m46ieaQxkwxqLwsvRA5"
+			]
+		},
+		"@prb/math/src/ud60x18/Conversions.sol": {
+			"keccak256": "0xd486ecca97abe69acdb28230088f4c7097fbdae5b36c5ae45d5be2faac4c33f2",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://6080870ec6955ff0f5278f9c480b218a68714daf5f2ee42da0276d08d7b82932",
+				"dweb:/ipfs/QmQ1SERHdemJgPrt4USwY8j5r63jZ8fQuJAm1knjMEEQEY"
+			]
+		},
+		"@prb/math/src/ud60x18/Errors.sol": {
+			"keccak256": "0xbab6b0e303d32f3a9d9e2fe881f0392b8c59a73051a4d34f21a403b3961b3044",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://86a019bcf2510d0691287329dc057479cc0abc48a5e15f245e7f15c03052d2c8",
+				"dweb:/ipfs/QmeXe5pbpDHvN5DZ8puXmH2RJ25zDHj55wpiStWtNQPvq6"
+			]
+		},
+		"@prb/math/src/ud60x18/Helpers.sol": {
+			"keccak256": "0xf5faff881391d2c060029499a666cc5f0bea90a213150bb476fae8f02a5df268",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://76105fa22bb1b5f1fa99abf9c4fbc9577a02c7bc204f271754c407f0d75489f5",
+				"dweb:/ipfs/QmVNGZSTniDuZus5DdbFubqJXCLtTaZit7YPm4ntjr5Lgr"
+			]
+		},
+		"@prb/math/src/ud60x18/Math.sol": {
+			"keccak256": "0xc4e51dfd9af62938e277e90fa724099f239d33727a35909ed48c292a76faf2fc",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://d731537cbc50b852c21d28625aeb2c329729afc23a7b86ff9d8ee5878f47e9d6",
+				"dweb:/ipfs/QmS7Cj4pAdPZcTp7RqYXyxBc9EYX92CT8icfkNigktUsLr"
+			]
+		},
+		"@prb/math/src/ud60x18/ValueType.sol": {
+			"keccak256": "0x1b200baf25d01a8b91b97b42114248636f742b5b7028487ef4daef6621e378a3",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://b5708ed017206bda2197654e80bea9f37b3a9993434bb066c903c2865e028f47",
+				"dweb:/ipfs/QmTyotZk2J5YvWkNvB2qhXBMgRGWW2UgPqR4JPocrXSr8n"
+			]
+		},
+		"contracts/Lottery.sol": {
+			"keccak256": "0x18545218f2f3c04e281d84c4258473c33ea42b5d8fb6ecb62f2ae1d16336cbb4",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://e7f054648daf290a95883845f2410c0681abb8a8fb74655000333c9b5e068c73",
+				"dweb:/ipfs/QmcQA2ffambkihJUMdSZ3yjYTRGAQhZJwEfqjpr4GusQGo"
+			]
+		},
+		"contracts/interfaces/ILottery.sol": {
+			"keccak256": "0x95924713aed588b7484f549ffa77fc4cef59806043a97cccf32e15c4c5062c0a",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://2030ea73834461e9b09772ed695111f4325ebff28d6eb84abb888b9f122eda90",
+				"dweb:/ipfs/QmUeeESxVXiqeDXq8YL9sifZsMhyezty8DoT8hnBSn3kMv"
+			]
+		},
+		"contracts/interfaces/IPrizePool.sol": {
+			"keccak256": "0xa2d76359374e48cb7076bd703ade1c9a70a29eb83a74b90e065d8291661a1a55",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://6f46bfbeb501245955ec359198ff9e2f15102e74ba22861da8eeb26f2caff8bd",
+				"dweb:/ipfs/QmaHjdNjh5KDQJ843DSs9y6kH4bwtZSuXLDFmESWvH25pS"
+			]
+		},
+		"contracts/interfaces/IVault.sol": {
+			"keccak256": "0x77dd49e6feaeeebf2338b3cdccc3fa0b895a020f2d938e16b98d2add68401d88",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://8a2a62ce747b201f0374810f250ba310602cb7287c4271f2372149af7dd61821",
+				"dweb:/ipfs/QmazRfZXvAHbBmPuMk6dXHVn3PLjxNX2kmoSLpjGtkoq55"
+			]
+		},
+		"contracts/lib/LuckyValueCalculator.sol": {
+			"keccak256": "0xbe856b6d35fe1ff000d54dbaf220f0eec26e32367b3409702a4d28b24e7d419e",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://4d93f93538c7a8356183d895fff8375bbdc4d0c8bfdd77cd084410c3c57dd1fc",
+				"dweb:/ipfs/QmP6U7a5619JGWUw2pV5u53YP1EdPVGhhHfvzSfKCjNHMU"
+			]
+		},
+		"contracts/lib/SortitionSumTree.sol": {
+			"keccak256": "0x4e571ac001634e2d6b04aa69ffd9cde0973a2d43307bcbc5c43760104ed0e4fe",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://1804bddc201b823d603dc2c6caf64ab299cbd472fea1ad84f4d227410ea3e2d0",
+				"dweb:/ipfs/QmPRtLpCBAVbGZVHqfNWvWYJ3rQfcQSf99o5yc4Ffyxmrc"
+			]
+		}
+	},
+	"version": 1
+}
