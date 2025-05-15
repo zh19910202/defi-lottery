@@ -135,10 +135,12 @@ contract Lottery is VRFConsumerBaseV2Plus, ILottery, AutomationCompatibleInterfa
 
     /// @notice Initializes the SortitionSumTree for a specific round
     /// @param roundId The round ID to initialize
-    function _initializeRoundTree(uint256 roundId) private {
-        if (!extendedLotteryRounds[roundId].initialized) {
-            SortitionSumTree.createTree(extendedLotteryRounds[roundId].weightTree, TREE_K);
-            extendedLotteryRounds[roundId].initialized = true;
+    function _initializeRoundTree(uint256 roundId) internal {
+        ExtendedLotteryRound storage round = extendedLotteryRounds[roundId];
+
+        if (!round.initialized) {
+            SortitionSumTree.createTree(round.weightTree, TREE_K);
+            round.initialized = true;
         }
     }
 
@@ -289,13 +291,9 @@ contract Lottery is VRFConsumerBaseV2Plus, ILottery, AutomationCompatibleInterfa
         _;
     }
 
-
-
     /// @notice Gets the current active lottery round ID
     /// @return The ID of the current lottery round
     function getCurrentRoundId() external view override returns (uint256) {
         return currentRoundId;
     }
-
-    
 }

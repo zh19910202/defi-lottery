@@ -449,4 +449,22 @@ contract Vault is IVault, ReentrancyGuard, Ownable {
     function getShareToken() external view override returns (address) {
         return shareToken;
     }
+
+    function getTotalDeposits(uint256 roundId) external view returns (uint256) {
+        return _depositRounds[roundId].totalDeposits;
+    }
+
+    function getCurrentTotalDeposits() external view returns (uint256) {
+        uint256 roundId = ILottery(lottery).getCurrentRoundId();
+        return _depositRounds[roundId].totalDeposits;
+    }
+
+    function getTotalParticipantCount(uint256 roundId) external view returns (uint256) {
+        return _depositRounds[roundId].participantCount;
+    }
+
+    function getCurrentTotalParticipantCount() external view returns (uint256) {
+        uint256 roundId = ILottery(lottery).getCurrentRoundId();
+        return _depositRounds[roundId].participantCount;
+    }
 }
