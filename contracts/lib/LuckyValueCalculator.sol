@@ -21,10 +21,10 @@ library LuckyValueCalculator {
     /// @return User's lucky value
     function calculateLuckyValue(uint256 amount, uint256 elapsed) internal pure returns (uint256) {
         require(amount > 0, "Amount must be positive");
-        require(elapsed > 0, "Time elapsed must be positive");
-
+        // Allow elapsed = 0 for same-block deposits with minimum weight
+        
         // Calculate time weight using logarithmic decay
-        uint256 timeWeight = (elapsed * TIME_WEIGHT_RATIO) / 10000;
+        uint256 timeWeight = elapsed > 0 ? (elapsed * TIME_WEIGHT_RATIO) / 10000 : 1;
 
         // Calculate amount weight
         uint256 amountWeight = (amount * AMOUNT_WEIGHT_RATIO) / 10000;

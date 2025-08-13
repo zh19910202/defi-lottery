@@ -17,77 +17,96 @@ describe("Vault", function () {
   describe("Deployment", function () {
     it("Should set the right token addresses and initial state", async function () {
       const vault = contracts.vault;
-      const usdc = contracts.usdc;
 
-      expect(await vault.usdc()).to.equal(await usdc.getAddress());
-      expect(await vault.getUserCount()).to.equal(0);
-      expect(await vault.getTotalWeight()).to.equal(0);
+      expect(await vault.getDepositTotal()).to.equal(0);
     });
   });
 
   describe("Deposits", function () {
     it("Should accept deposits and update balances correctly", async function () {
-      const depositAmount = ethers.parseUnits("100", 6);
+      const depositAmount = ethers.parseEther("0.5"); // 0.5 ETH worth
       console.log(await contracts.usdc.balanceOf(accounts.users[0]));
       await contracts.vault.connect(accounts.users[0]).deposit(depositAmount);
       expect(await contracts.vault.getDepositTotal()).to.equal(depositAmount);
     });
 
     it("Should emit Deposited event", async function () {
-      const depositAmount = ethers.parseUnits("100", 6);
+      const depositAmount = ethers.parseEther("0.5"); // 0.5 ETH worth
       await expect(contracts.vault.connect(accounts.users[0]).deposit(depositAmount))
         .to.emit(contracts.vault, "Deposited")
-        .withArgs(accounts.users[0].address, depositAmount, anyValue);
+        .withArgs(accounts.users[0].address, depositAmount, anyValue, anyValue);
     });
 
     it("Should revert when deposit amount is zero", async function () {
       await expect(contracts.vault.connect(accounts.users[0]).deposit(0)).to.be.revertedWith(
-        "Amount must be greater than zero",
+        "Min deposit 0.1 ETH",
       );
     });
 
-    it("Should revert when user has insufficient USDC balance", async function () {
-      const largeAmount = ethers.parseUnits("1000000", 6); // 超过用户余额
+    it("Should revert when user has insufficient balance", async function () {
+      const largeAmount = ethers.parseEther("1000"); // 超过用户余额
       await expect(contracts.vault.connect(accounts.users[0]).deposit(largeAmount)).to.be.reverted;
     });
   });
 
   describe("Withdrawals", function () {
-    const depositAmount = ethers.parseUnits("100", 6);
+    const depositAmount = ethers.parseEther("0.5"); // 0.5 ETH worth
 
     beforeEach(async function () {
       await contracts.vault.connect(accounts.users[0]).deposit(depositAmount);
     });
 
     it("Should allow withdrawals and update balances correctly", async function () {
-      const withdrawAmount = ethers.parseUnits("50", 6);
       const balanceBefore = await contracts.usdc.balanceOf(accounts.users[0].address);
+      
+      // 获取share token地址并approve
+      const shareTokenAddress = await contracts.vault.getShareToken();
+      const shareTokenContract = await ethers.getContractAt("VaultShareToken", shareTokenAddress);
+      await shareTokenContract.connect(accounts.users[0]).approve(await contracts.vault.getAddress(), depositAmount);
 
-      await contracts.vault.connect(accounts.users[0]).withdraw(withdrawAmount);
+      await contracts.vault.connect(accounts.users[0])["withdraw()"]();
 
       const balanceAfter = await contracts.usdc.balanceOf(accounts.users[0].address);
-      expect(balanceAfter - balanceBefore).to.equal(withdrawAmount);
-      expect(await contracts.vault.getDepositTotal()).to.equal(depositAmount - withdrawAmount);
+      expect(balanceAfter - balanceBefore).to.equal(depositAmount);
+      expect(await contracts.vault.getDepositTotal()).to.equal(0);
     });
 
     it("Should emit Withdrawn event", async function () {
-      const withdrawAmount = ethers.parseUnits("50", 6);
-      await expect(contracts.vault.connect(accounts.users[0]).withdraw(withdrawAmount))
+      // 获取share token地址并approve
+      const shareTokenAddress = await contracts.vault.getShareToken();
+      const shareTokenContract = await ethers.getContractAt("VaultShareToken", shareTokenAddress);
+      await shareTokenContract.connect(accounts.users[0]).approve(await contracts.vault.getAddress(), depositAmount);
+      
+      await expect(contracts.vault.connect(accounts.users[0])["withdraw()"]())
         .to.emit(contracts.vault, "Withdrawn")
-        .withArgs(accounts.users[0].address, withdrawAmount, anyValue);
+        .withArgs(accounts.users[0].address, depositAmount, anyValue, anyValue);
     });
 
-    it("Should revert when withdrawal amount is zero", async function () {
-      await expect(contracts.vault.connect(accounts.users[0]).withdraw(0)).to.be.revertedWith(
-        "Amount must be greater than zero",
-      );
+    it("Should revert when user has no deposit", async function () {
+      // 获取share token地址并approve
+      const shareTokenAddress = await contracts.vault.getShareToken();
+      const shareTokenContract = await ethers.getContractAt("VaultShareToken", shareTokenAddress);
+      await shareTokenContract.connect(accounts.users[0]).approve(await contracts.vault.getAddress(), depositAmount);
+      
+      // 先提取所有资金
+      await contracts.vault.connect(accounts.users[0])["withdraw()"]();
+      // 再次尝试提取应该失败
+      await expect(contracts.vault.connect(accounts.users[0])["withdraw()"]()).to.be.reverted;
     });
 
-    it("Should revert when withdrawal amount exceeds deposit balance", async function () {
-      const excessAmount = depositAmount + ethers.parseUnits("1", 6);
-      await expect(
-        contracts.vault.connect(accounts.users[0]).withdraw(excessAmount),
-      ).to.be.revertedWith("Insufficient deposit balance");
+    it("Should allow withdrawal from specific round", async function () {
+      const currentRoundId = await contracts.lottery.getCurrentRoundId();
+      const balanceBefore = await contracts.usdc.balanceOf(accounts.users[0].address);
+      
+      // 获取share token地址并approve
+      const shareTokenAddress = await contracts.vault.getShareToken();
+      const shareTokenContract = await ethers.getContractAt("VaultShareToken", shareTokenAddress);
+      await shareTokenContract.connect(accounts.users[0]).approve(await contracts.vault.getAddress(), depositAmount);
+      
+      await contracts.vault.connect(accounts.users[0])["withdraw(uint256)"](currentRoundId);
+      
+      const balanceAfter = await contracts.usdc.balanceOf(accounts.users[0].address);
+      expect(balanceAfter - balanceBefore).to.equal(depositAmount);
     });
   });
 

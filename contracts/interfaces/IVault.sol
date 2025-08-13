@@ -81,6 +81,14 @@ interface IVault {
         address indexed newYieldAggregator
     );
 
+    /// @notice Emitted when governance contract is set
+    /// @param oldGovernance The address of the old governance contract
+    /// @param newGovernance The address of the new governance contract
+    event GovernanceSet(
+        address indexed oldGovernance,
+        address indexed newGovernance
+    );
+
     /// @notice Sets the lottery contract address
     /// @param _lottery The address of the lottery contract
     function setLottery(address _lottery) external;
@@ -141,6 +149,12 @@ interface IVault {
     /// @param roundId The ID of the lottery round
     /// @dev Will withdraw the full amount of user's deposit and reset their weight to zero
     function withdraw(uint256 roundId) external;
+
+    /// @notice Allows withdrawal on behalf of a user from a specific round
+    /// @param roundId The ID of the lottery round
+    /// @param to The address to withdraw for
+    /// @dev Will withdraw the full amount of user's deposit and reset their weight to zero
+    function withdrawFor(uint256 roundId, address to) external;
 
     /// @notice Returns the total number of participants in the current round
     /// @return The number of users in the current lottery round

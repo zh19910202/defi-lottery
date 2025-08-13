@@ -89,11 +89,8 @@ contract LotteryRouter is ILotteryRouter, Ownable, ReentrancyGuard {
         // weth转移到Vault合约
         IERC20(weth).safeTransfer(vault, amount);
 
-        // 调用vault的depositFor函数
-        (bool success, ) = vault.call(
-            abi.encodeWithSignature("depositFor(address,uint256)", msg.sender, amount)
-        );
-        require(success, "WETH deposit forwarding failed");
+        // 调用vault的depositFor函数 - use interface instead of low-level call
+        IVault(vault).depositFor(msg.sender, amount);
 
         emit DepositRouted(msg.sender, amount);
     }
@@ -141,11 +138,8 @@ contract LotteryRouter is ILotteryRouter, Ownable, ReentrancyGuard {
         // 将shareToken转移到Vault合约
         IERC20(shareToken).safeTransfer(vault, amount);
 
-        // 直接调用Vault合约的withdraw(uint256)方法
-        (bool withdrawSuccess, ) = vault.call(
-            abi.encodeWithSignature("withdrawFor(uint256,address)", roundId,msg.sender)
-        );
-        require(withdrawSuccess, "Withdrawal failed");
+        // 直接调用Vault合约的withdraw方法 - use interface instead of low-level call
+        IVault(vault).withdrawFor(roundId, msg.sender);
 
         emit WithdrawalInstructionIssued(msg.sender);
     }

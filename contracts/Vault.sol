@@ -9,12 +9,14 @@ import "./interfaces/IYieldAggregator.sol";
 import "./interfaces/ILottery.sol";
 import "./interfaces/IWETH.sol";
 import "./interfaces/IVaultShareToken.sol";
+import "./interfaces/IGovernance.sol";
+import "./security/EmergencyPause.sol";
 import "./lib/LuckyValueCalculator.sol";
 
 /// @title Vault Contract
 /// @notice Manages user deposits and withdrawals in the lottery system
 /// @dev Implements reentrancy protection and accepts ETH deposits
-contract Vault is IVault, ReentrancyGuard, Ownable {
+contract Vault is IVault, ReentrancyGuard, EmergencyPause {
     using SafeERC20 for IERC20;
 
     // 彩票合约地
@@ -30,6 +32,9 @@ contract Vault is IVault, ReentrancyGuard, Ownable {
     address public shareToken;
 
     address public yieldAggregator;
+    
+    /// @notice Governance contract address
+    address public governance;
 
     // 轮次ID到轮次数据的映射
     mapping(uint256 => DepositRound) private _depositRounds;
@@ -60,7 +65,7 @@ contract Vault is IVault, ReentrancyGuard, Ownable {
         uint256 totalWeight; // 本轮所有用户权重之和
     }
 
-    constructor() {
+    constructor(address _emergencyGuardian) EmergencyPause(_emergencyGuardian) {
         _depositRounds[0].isActive = true;
         _depositRounds[0].totalWeight = 0; // 初始化总权重为0
         emit NewRoundStarted(0, block.timestamp, 0); // 初始时不知道开奖时间
@@ -75,9 +80,23 @@ contract Vault is IVault, ReentrancyGuard, Ownable {
         emit LotterySet(previousLottery, _lottery);
     }
 
+    /// @notice Modifier to check if caller is owner or governance
+    modifier onlyOwnerOrGovernance() {
+        require(msg.sender == owner() || msg.sender == governance, "Not authorized");
+        _;
+    }
+    
+    /// @notice Set governance contract address
+    /// @param _governance Governance contract address
+    function setGovernance(address _governance) external onlyOwner {
+        require(_governance != address(0), "Invalid governance address");
+        governance = _governance;
+        emit GovernanceSet(governance, _governance);
+    }
+
     /// @notice 设置奖池合约地址
     /// @param _prizePool 奖池合约地址
-    function setPrizePool(address _prizePool) external onlyOwner {
+    function setPrizePool(address _prizePool) external onlyOwnerOrGovernance {
         require(_prizePool != address(0), "Invalid prizePool address");
         address previousPrizePool = prizePool;
         prizePool = _prizePool;
@@ -86,7 +105,7 @@ contract Vault is IVault, ReentrancyGuard, Ownable {
 
     /// @notice 设置WETH代币地址
     /// @param _weth WETH代币地址
-    function setWETH(address _weth) external onlyOwner {
+    function setWETH(address _weth) external onlyOwnerOrGovernance {
         require(_weth != address(0), "Invalid WETH address");
         address previousWETH = _wethToken;
         _wethToken = _weth;
@@ -95,14 +114,14 @@ contract Vault is IVault, ReentrancyGuard, Ownable {
 
     /// @notice 设置权益代币地址
     /// @param _shareToken 权益代币地址
-    function setShareToken(address _shareToken) external onlyOwner {
+    function setShareToken(address _shareToken) external onlyOwnerOrGovernance {
         require(_shareToken != address(0), "Invalid shareToken address");
         address previousShareToken = shareToken;
         shareToken = _shareToken;
         emit ShareTokenSet(previousShareToken, _shareToken);
     }
 
-    function setYieldAggregator(address _yieldAggregator) external onlyOwner {
+    function setYieldAggregator(address _yieldAggregator) external onlyOwnerOrGovernance {
         require(_yieldAggregator != address(0), "Invalid YieldAggregator address");
         address oldYieldAggregator = yieldAggregator;
         yieldAggregator = _yieldAggregator;
@@ -130,7 +149,7 @@ contract Vault is IVault, ReentrancyGuard, Ownable {
     /// @param amount 费用金额
     /// @return 操作是否成功
     function depositFeeToYieldAggregator(uint256 amount) external returns (bool) {
-        require(msg.sender == prizePool, "Only PrizePool can call this function");
+        require(msg.sender == prizePool, "Only PrizePool");
         require(amount > 0, "Amount must be greater than 0");
         require(yieldAggregator != address(0), "YieldAggregator not set");
         require(_wethToken != address(0), "WETH not set");
@@ -154,7 +173,7 @@ contract Vault is IVault, ReentrancyGuard, Ownable {
     /// @dev 只能由彩票合约调用
     /// @param newRoundId 新轮次的ID
     function startNewRound(uint256 newRoundId) external override {
-        require(msg.sender == lottery, "Only lottery contract can start new round");
+        require(msg.sender == lottery, "Only lottery");
 
         // 获取下一次开奖时间
         uint256 nextDrawTimestamp = ILottery(lottery).nextDrawTimestamp();
@@ -173,7 +192,7 @@ contract Vault is IVault, ReentrancyGuard, Ownable {
 
     /// @notice Deposit between 0.1 and 1 ETH worth of WETH tokens to enter the lottery
     /// @param amount WETH代币数量
-    function deposit(uint256 amount) external override nonReentrant {
+    function deposit(uint256 amount) external override nonReentrant whenNotPaused whenFunctionNotPaused(bytes4(keccak256("deposit(uint256)"))) {
         // 处理存款逻辑
         _depositCommon(msg.sender, amount);
     }
@@ -182,7 +201,7 @@ contract Vault is IVault, ReentrancyGuard, Ownable {
     /// @dev 不再限制只能由路由合约调用
     /// @param user 实际用户地址
     /// @param amount WETH代币数量
-    function depositFor(address user, uint256 amount) external nonReentrant {
+    function depositFor(address user, uint256 amount) external nonReentrant whenNotPaused whenFunctionNotPaused(bytes4(keccak256("depositFor(address,uint256)"))) {
         // 处理存款逻辑
         _depositCommon(user, amount);
     }
@@ -193,17 +212,17 @@ contract Vault is IVault, ReentrancyGuard, Ownable {
     function _depositCommon(address user, uint256 amount) internal {
         require(user != address(0), "Invalid user address");
         require(_wethToken != address(0), "WETH not set");
-        require(amount >= MIN_DEPOSIT, "Must deposit at least 0.1 ETH worth of WETH");
-        require(amount <= MAX_DEPOSIT, "Must deposit at most 1 ETH worth of WETH");
-        // 检查合约当前持有的WETH数量
-        uint wethAmount = IERC20(_wethToken).balanceOf(address(this));
-        require(wethAmount >= amount, "Insufficient WETH balance");
+        require(amount >= MIN_DEPOSIT, "Min deposit 0.1 ETH");
+        require(amount <= MAX_DEPOSIT, "Max deposit 1 ETH");
+        
+        // 从用户转移WETH代币到合约
+        IERC20(_wethToken).safeTransferFrom(user, address(this), amount);
         // 获取当前轮次ID
         uint256 _activeRoundId = ILottery(lottery).getCurrentRoundId();
         DepositRound storage round = _depositRounds[_activeRoundId];
 
         // 检查用户是否已经在当前轮次参与过
-        require(!round.hasParticipated[user], "User can only deposit once per round");
+        require(!round.hasParticipated[user], "Already participated");
 
         // 更新用户存款信息
         Deposit storage userDeposit = round.deposits[user];
@@ -235,9 +254,15 @@ contract Vault is IVault, ReentrancyGuard, Ownable {
 
         // 计算权重
         uint256 weight = LuckyValueCalculator.calculateLuckyValue(amount, timeUntilDraw);
+        
+        // Scale down weight if it exceeds uint96 maximum to prevent overflow
+        if (weight > type(uint96).max) {
+            weight = type(uint96).max;
+        }
         userDeposit.weight = uint96(weight);
 
-        // 更新轮次的总权重
+        // Check for overflow when adding to total weight
+        require(round.totalWeight + weight >= round.totalWeight, "Total weight overflow");
         round.totalWeight += weight;
 
         // 更新轮次和全局总存款
@@ -271,7 +296,7 @@ contract Vault is IVault, ReentrancyGuard, Ownable {
     }
 
     // 从当前轮次取款
-    function withdraw() external override nonReentrant {
+    function withdraw() external override nonReentrant whenFunctionNotPaused(bytes4(keccak256("withdraw()"))) {
         // 获取用户存款金额
         uint256 _activeRoundId = ILottery(lottery).getCurrentRoundId();
         // 调用内部逻辑进行全额取款
@@ -279,12 +304,12 @@ contract Vault is IVault, ReentrancyGuard, Ownable {
     }
 
     // 从特定轮次取款
-    function withdraw(uint256 roundId) external override nonReentrant {
+    function withdraw(uint256 roundId) external override nonReentrant whenFunctionNotPaused(bytes4(keccak256("withdraw(uint256)"))) {
         // 调用内部逻辑进行全额取款
         _withdrawFromRound(msg.sender, roundId);
     }
 
-    function withdrawFor(uint256 roundId, address to) external nonReentrant {
+    function withdrawFor(uint256 roundId, address to) external nonReentrant whenFunctionNotPaused(bytes4(keccak256("withdrawFor(uint256,address)"))) {
         // 调用内部逻辑进行全额取款，将资金发送到指定的地址
         _withdrawFromRound(to, roundId);
     }
@@ -293,59 +318,60 @@ contract Vault is IVault, ReentrancyGuard, Ownable {
     function _withdrawFromRound(address to, uint256 roundId) internal {
         // 否持有足够的权益代币
         require(shareToken != address(0), "ShareToken not set");
-        Deposit storage userDeposit = _depositRounds[roundId].deposits[to];
+        require(_wethToken != address(0), "WETH not set");
+        require(yieldAggregator != address(0), "YieldAggregator not set");
+        
+        uint256 _activeRoundId = ILottery(lottery).getCurrentRoundId();
+        require(roundId <= _activeRoundId, "Invalid round ID");
+        
+        DepositRound storage round = _depositRounds[roundId];
+        Deposit storage userDeposit = round.deposits[to];
         uint256 fullAmount = userDeposit.amount;
         require(fullAmount > 0, "No deposit to withdraw");
         require(
-            IERC20(shareToken).balanceOf(address(this)) >= fullAmount,
-            "Insufficient share tokens"
+            IERC20(shareToken).balanceOf(to) >= fullAmount,
+            "User has insufficient share tokens"
         );
-        uint256 _activeRoundId = ILottery(lottery).getCurrentRoundId();
-        require(roundId <= _activeRoundId, "Invalid round ID");
-        require(_wethToken != address(0), "WETH not set");
-        require(shareToken != address(0), "ShareToken not set");
-        require(yieldAggregator != address(0), "YieldAggregator not set");
-        DepositRound storage round = _depositRounds[roundId];
-
         require(round.hasParticipated[to], "No participation in this round");
-        require(userDeposit.amount > 0, "No deposit");
-
+        
+        // Store state changes before external calls to prevent reentrancy
         uint256 withdrawAmount = fullAmount;
+        uint256 userWeight = userDeposit.weight;
+        
+        // Clear user deposit state first
+        userDeposit.amount = 0;
+        userDeposit.weight = 0;
+        
+        // Update round totals
+        round.totalDeposits -= withdrawAmount;
+        _depositTotal -= withdrawAmount;
+        
+        // Update total weight
+        if (userWeight > 0) {
+            round.totalWeight = round.totalWeight > userWeight ? round.totalWeight - userWeight : 0;
+        }
+        
+        // Remove from participants if round is active
+        if (round.isActive) {
+            _removeParticipant(to, roundId);
+        }
+        
+        // Now perform external calls after state updates
+        // Transfer share tokens from user to vault
+        IERC20(shareToken).safeTransferFrom(to, address(this), fullAmount);
 
-        // 销毁ShareToken
+        // Burn ShareToken
         IVaultShareToken(shareToken).burn(withdrawAmount);
         emit ShareTokenBurned(withdrawAmount, block.timestamp);
 
-        // 获取用户权重以便从总权重中减去
-        uint256 userWeight = userDeposit.weight;
-        if (userWeight > 0) {
-            // 更新轮次的总权重
-            round.totalWeight = round.totalWeight > userWeight ? round.totalWeight - userWeight : 0;
-
-            // 更新Lottery合约中的排序求和树，取款时将权重设为0
-            if (roundId == _activeRoundId && lottery != address(0)) {
-                try ILottery(lottery).updateUserWeight(to, 0) {
-                    // 成功更新权重
-                } catch {
-                    // 如果失败，继续执行，不影响取款流程
-                }
+        // Update Lottery contract weight if this is the active round
+        if (roundId == _activeRoundId && lottery != address(0)) {
+            try ILottery(lottery).updateUserWeight(to, 0) {
+                // Successfully updated weight
+            } catch {
+                // If failed, continue execution without affecting withdrawal
             }
         }
-
-        // 清空存款金额
-        userDeposit.amount = 0;
-        // 清零权重
-        userDeposit.weight = 0;
-
-        // 如果轮次仍然活跃，从参与者列表中移除用户
-        if (round.isActive) {
-            // 从参与者列表中移除用户
-            _removeParticipant(to, roundId);
-        }
-
-        // 更新轮次和全局总存款
-        round.totalDeposits -= withdrawAmount;
-        _depositTotal -= withdrawAmount;
 
         // 从YieldAggregator提取WETH代币
         bool withdrawSuccess = IYieldAggregator(yieldAggregator).withdraw(withdrawAmount);

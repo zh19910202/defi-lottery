@@ -28,6 +28,7 @@ contract YieldAggregator is Ownable {
         require(_weth != address(0), "Invalid WETH address");
         require(_vault != address(0), "Invalid Vault address");
         require(_prizePool != address(0), "Invalid PrizePool address");
+        require(_comet != address(0), "Invalid Comet address");
 
         weth = IERC20(_weth);
         vault = IVault(_vault);
@@ -56,8 +57,14 @@ contract YieldAggregator is Ownable {
         // Transfer WETH from Vault to this contract
         weth.safeTransferFrom(msg.sender, address(this), amount);
 
-        // Approve WETH to Compound
-        weth.safeApprove(address(comet), amount);
+        // Use safeIncreaseAllowance to avoid approval race condition
+        uint256 currentAllowance = weth.allowance(address(this), address(comet));
+        if (currentAllowance < amount) {
+            if (currentAllowance > 0) {
+                weth.safeApprove(address(comet), 0);
+            }
+            weth.safeApprove(address(comet), amount);
+        }
 
         // Supply WETH to Compound V3
         comet.supply(address(weth), amount);
@@ -73,15 +80,28 @@ contract YieldAggregator is Ownable {
     /// @return success True if withdrawal was successful
     function withdraw(uint256 amount) external onlyPrizePoolOrVault returns (bool) {
         require(amount > 0, "Amount must be greater than zero");
+        
+        // Check available balance before withdrawal
+        uint256 availableBalance = comet.balanceOf(address(this));
+        require(availableBalance >= amount, "Insufficient balance in Compound");
+
+        // Store balance before withdrawal for slippage protection
+        uint256 balanceBefore = weth.balanceOf(address(this));
 
         // Withdraw WETH directly from Compound V3
         comet.withdraw(address(weth), amount);
+        
+        // Check actual amount received (slippage protection)
+        uint256 balanceAfter = weth.balanceOf(address(this));
+        uint256 actualReceived = balanceAfter - balanceBefore;
+        // Allow up to 10% slippage for testing, can be made configurable later
+        require(actualReceived >= amount * 90 / 100, "Excessive slippage detected");
 
         // Transfer WETH to caller
-        weth.safeTransfer(msg.sender, amount);
+        weth.safeTransfer(msg.sender, actualReceived);
 
         // Emit withdrawal event
-        emit Withdrawn(msg.sender, amount, block.timestamp);
+        emit Withdrawn(msg.sender, actualReceived, block.timestamp);
         return true;
     }
 

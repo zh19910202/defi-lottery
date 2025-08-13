@@ -8,6 +8,7 @@ export interface TestContracts {
   vault: Contract;
   prizePool: Contract;
   yieldAggregator: Contract;
+  lotteryRouter: Contract;
   usdc: Contract;
   vrfCoordinator: Contract;
   comet: Contract;
@@ -29,7 +30,7 @@ export async function setupTest(): Promise<{
   const MockERC20Factory = await ethers.getContractFactory(
     "contracts/test/MockERC20.sol:MockERC20",
   );
-  const usdc = await MockERC20Factory.deploy("USD Coin", "USDC", 6);
+  const usdc = await MockERC20Factory.deploy("Test WETH", "TWETH", 18);
   await usdc.waitForDeployment();
 
   const MockVRFCoordinatorFactory = await ethers.getContractFactory("MockVRFCoordinatorV2");
@@ -48,20 +49,19 @@ export async function setupTest(): Promise<{
     await vrfCoordinator.getAddress(),
     1, // subscriptionId
     "0x0000000000000000000000000000000000000000000000000000000000000000", // keyHash
-    await usdc.getAddress(),
+    false, // enableNativePayment
   );
   await lottery.waitForDeployment();
 
   const PrizePool = await ethers.getContractFactory("PrizePool");
   const prizePool = await PrizePool.deploy(
-    await usdc.getAddress(),
     await lottery.getAddress(),
-    await comet.getAddress(),
+    500, // 5% fee rate
   );
   await prizePool.waitForDeployment();
 
   const Vault = await ethers.getContractFactory("Vault");
-  const vault = await Vault.deploy(await usdc.getAddress());
+  const vault = await Vault.deploy();
   await vault.waitForDeployment();
 
   const YieldAggregatorFactory = await ethers.getContractFactory("YieldAggregator");
@@ -78,11 +78,32 @@ export async function setupTest(): Promise<{
 
   await prizePool.setVault(await vault.getAddress());
   await prizePool.setYieldAggregator(await yieldAggregator.getAddress());
+  await prizePool.setWETH(await usdc.getAddress()); // 在测试中使用USDC作为WETH
 
   await vault.setYieldAggregator(await yieldAggregator.getAddress());
+  await vault.setWETH(await usdc.getAddress()); // 在测试中使用USDC作为WETH
+  await vault.setLottery(await lottery.getAddress());
 
-  // 为测试账户铸造USDC
-  const amount = ethers.parseUnits("10000", 6); // 10000 USDC
+  // 部署并设置VaultShareToken
+  const VaultShareTokenFactory = await ethers.getContractFactory("VaultShareToken");
+  const vaultShareToken = await VaultShareTokenFactory.deploy("Vault Share Token", "VST");
+  await vaultShareToken.waitForDeployment();
+  await vault.setShareToken(await vaultShareToken.getAddress());
+  await vaultShareToken.setVault(await vault.getAddress());
+
+  // 部署LotteryRouter
+  const LotteryRouterFactory = await ethers.getContractFactory("LotteryRouter");
+  const lotteryRouter = await LotteryRouterFactory.deploy();
+  await lotteryRouter.waitForDeployment();
+
+  // 配置LotteryRouter
+  await lotteryRouter.setLottery(await lottery.getAddress());
+  await lotteryRouter.setVault(await vault.getAddress());
+  await lotteryRouter.setPrizePool(await prizePool.getAddress());
+  await lotteryRouter.setShareToken(await vaultShareToken.getAddress());
+
+  // 为测试账户铸造USDC (使用18位精度以匹配ETH)
+  const amount = ethers.parseEther("10"); // 10 ETH worth of tokens
   for (const user of [owner, ...users]) {
     await usdc.mint(user.address, amount);
     await usdc.connect(user).approve(await vault.getAddress(), ethers.MaxUint256);
@@ -94,6 +115,7 @@ export async function setupTest(): Promise<{
       vault,
       prizePool,
       yieldAggregator,
+      lotteryRouter,
       usdc,
       vrfCoordinator,
       comet,

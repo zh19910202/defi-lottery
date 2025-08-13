@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
+import "@chainlink/contracts/src/v0.8/vrf/dev/libraries/VRFV2PlusClient.sol";
+
 contract MockVRFCoordinatorV2 {
     event RandomWordsRequested(
         bytes32 indexed keyHash,
@@ -23,6 +25,7 @@ contract MockVRFCoordinatorV2 {
     uint256 private nonce;
     mapping(uint256 => address) private s_requests;
 
+    // 老版本的方法 - 保持兼容性
     function requestRandomWords(
         bytes32 keyHash,
         uint64 subId,
@@ -43,6 +46,29 @@ contract MockVRFCoordinatorV2 {
             minimumRequestConfirmations,
             callbackGasLimit,
             numWords,
+            msg.sender
+        );
+
+        return requestId;
+    }
+
+    // 新版本的方法 - 接受结构体参数
+    function requestRandomWords(
+        VRFV2PlusClient.RandomWordsRequest memory req
+    ) external returns (uint256) {
+        uint256 requestId = uint256(
+            keccak256(abi.encodePacked(req.keyHash, nonce++))
+        );
+        s_requests[requestId] = msg.sender;
+
+        emit RandomWordsRequested(
+            req.keyHash,
+            requestId,
+            uint256(blockhash(block.number - 1)),
+            uint64(req.subId),
+            req.requestConfirmations,
+            req.callbackGasLimit,
+            req.numWords,
             msg.sender
         );
 

@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run test:coverage)",
+      "Bash(rm:*)",
+      "Bash(npm run compile)",
+      "Bash(npx hardhat test:*)",
+      "Bash(npm test)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

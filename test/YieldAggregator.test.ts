@@ -21,12 +21,12 @@ describe("YieldAggregator", function () {
       const vault = contracts.vault;
       const prizePool = contracts.prizePool;
 
-      expect(await yieldAggregator.usdc()).to.equal(await usdc.getAddress());
+      expect(await yieldAggregator.weth()).to.equal(await usdc.getAddress());
       expect(await yieldAggregator.vault()).to.equal(await vault.getAddress());
       expect(await yieldAggregator.prizePool()).to.equal(await prizePool.getAddress());
       expect(await contracts.yieldAggregator.comet()).to.equal(await contracts.comet.getAddress());
       describe("Compound Integration", function () {
-        const depositAmount = ethers.parseUnits("100", 6);
+        const depositAmount = ethers.parseEther("0.5"); // 0.5 ETH worth
 
         it("Should supply USDC to Compound when depositing through Vault", async function () {
           await contracts.vault.connect(accounts.users[0]).deposit(depositAmount);
@@ -38,14 +38,18 @@ describe("YieldAggregator", function () {
         });
 
         it("Should withdraw USDC from Compound when withdrawing through Vault", async function () {
-          const withdrawAmount = ethers.parseUnits("50", 6);
-          await contracts.vault.connect(accounts.users[0]).withdraw(withdrawAmount);
+          // 获取share token地址并approve
+          const shareTokenAddress = await contracts.vault.getShareToken();
+          const shareTokenContract = await ethers.getContractAt("VaultShareToken", shareTokenAddress);
+          await shareTokenContract.connect(accounts.users[0]).approve(await contracts.vault.getAddress(), depositAmount);
+          
+          await contracts.vault.connect(accounts.users[0])["withdraw()"]();
 
-          // 验证 Compound 中的余额减少
+          // 验证 Compound 中的余额减少到0
           expect(
             (await contracts.comet.userBasic(await contracts.yieldAggregator.getAddress()))
               .principal,
-          ).to.equal(depositAmount - withdrawAmount);
+          ).to.equal(0);
         });
       });
     });

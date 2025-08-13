@@ -30,84 +30,97 @@ describe("PrizePool", function () {
       const usdc = contracts.usdc;
       const lottery = contracts.lottery;
 
-      expect(await prizePool.usdc()).to.equal(await usdc.getAddress());
-      expect(await prizePool.comet()).to.equal(await contracts.comet.getAddress());
       expect(await prizePool.lottery()).to.equal(await lottery.getAddress());
+      expect(await prizePool.yieldAggregator()).to.equal(await contracts.yieldAggregator.getAddress());
+      expect(await prizePool.vault()).to.equal(await contracts.vault.getAddress());
       expect(await prizePool.getPrizePoolAmount()).to.equal(0);
     });
   });
 
   describe("Deposits", function () {
     it("Should accept deposits through vault", async function () {
-      const depositAmount = parseUnits("100", 6);
+      const depositAmount = ethers.parseEther("0.5"); // 0.5 ETH worth
       await contracts.vault.connect(accounts.users[0]).deposit(depositAmount);
 
       expect(await contracts.vault.getDepositTotal()).to.equal(depositAmount);
     });
 
     it("Should emit Deposited event", async function () {
-      const depositAmount = parseUnits("100", 6);
+      const depositAmount = ethers.parseEther("0.5"); // 0.5 ETH worth
       const tx = await contracts.vault.connect(accounts.users[0]).deposit(depositAmount);
 
       await expect(tx)
         .to.emit(contracts.vault, "Deposited")
-        .withArgs(accounts.users[0].address, depositAmount, anyValue);
+        .withArgs(accounts.users[0].address, depositAmount, anyValue, anyValue);
     });
 
     it("Should revert when deposit amount is zero", async function () {
       await expect(contracts.vault.connect(accounts.users[0]).deposit(0)).to.be.revertedWith(
-        "Amount must be greater than zero",
+        "Min deposit 0.1 ETH",
       );
     });
   });
 
   describe("Withdrawals", function () {
-    const depositAmount = parseUnits("100", 6);
+    const depositAmount = ethers.parseEther("0.5"); // 0.5 ETH worth
 
     beforeEach(async function () {
       await contracts.vault.connect(accounts.users[0]).deposit(depositAmount);
     });
 
     it("Should allow withdrawals through vault", async function () {
-      const withdrawAmount = parseUnits("50", 6);
       const balanceBefore = await contracts.usdc.balanceOf(accounts.users[0].address);
-      console.log("balanceBefore", balanceBefore);
+      
+      // 获取share token地址并approve
+      const shareTokenAddress = await contracts.vault.getShareToken();
+      const shareTokenContract = await ethers.getContractAt("VaultShareToken", shareTokenAddress);
+      await shareTokenContract.connect(accounts.users[0]).approve(await contracts.vault.getAddress(), depositAmount);
 
-      await contracts.vault.connect(accounts.users[0]).withdraw(withdrawAmount);
+      await contracts.vault.connect(accounts.users[0])["withdraw()"]();
 
       const balanceAfter = await contracts.usdc.balanceOf(accounts.users[0].address);
-      console.log("balanceAfter", balanceAfter);
-      expect(balanceAfter - balanceBefore).to.equal(withdrawAmount);
-      expect(await contracts.vault.getDepositTotal()).to.equal(depositAmount - withdrawAmount);
+      expect(balanceAfter - balanceBefore).to.equal(depositAmount);
     });
 
     it("Should emit Withdrawn event", async function () {
-      const withdrawAmount = parseUnits("50", 6);
-      const tx = await contracts.vault.connect(accounts.users[0]).withdraw(withdrawAmount);
+      // 获取share token地址并approve
+      const shareTokenAddress = await contracts.vault.getShareToken();
+      const shareTokenContract = await ethers.getContractAt("VaultShareToken", shareTokenAddress);
+      await shareTokenContract.connect(accounts.users[0]).approve(await contracts.vault.getAddress(), depositAmount);
+
+      const tx = await contracts.vault.connect(accounts.users[0])["withdraw()"]();
 
       await expect(tx)
         .to.emit(contracts.vault, "Withdrawn")
-        .withArgs(accounts.users[0].address, withdrawAmount, anyValue);
+        .withArgs(accounts.users[0].address, depositAmount, anyValue, anyValue);
     });
 
-    it("Should revert when withdrawal amount exceeds deposit", async function () {
-      const withdrawAmount = depositAmount + ethers.toBigInt(1);
-      await expect(
-        contracts.vault.connect(accounts.users[0]).withdraw(withdrawAmount),
-      ).to.be.revertedWith("Insufficient deposit balance");
+    it("Should revert when user has no deposit", async function () {
+      // 先提取所有资金
+      const shareTokenAddress = await contracts.vault.getShareToken();
+      const shareTokenContract = await ethers.getContractAt("VaultShareToken", shareTokenAddress);
+      await shareTokenContract.connect(accounts.users[0]).approve(await contracts.vault.getAddress(), depositAmount);
+      await contracts.vault.connect(accounts.users[0])["withdraw()"]();
+      
+      // 再次尝试提取应该失败
+      await expect(contracts.vault.connect(accounts.users[0])["withdraw()"]()).to.be.reverted;
     });
   });
 
   describe("Prize Distribution", function () {
-    const depositAmount = parseUnits("1000", 6);
+    const depositAmount = ethers.parseEther("0.5"); // 0.5 ETH worth
 
     beforeEach(async function () {
       await contracts.vault.connect(accounts.users[0]).deposit(depositAmount);
     });
 
     it("Should allow prize distribution through lottery", async function () {
+      // 模拟收益聚合器产生收益
+      const yieldAmount = ethers.parseEther("0.6"); // 0.6 ETH总余额 (包含0.5存款 + 0.1收益)
+      await contracts.comet.setBalance(await contracts.yieldAggregator.getAddress(), yieldAmount);
+      
       // 增加时间以满足开奖间隔
-      await ethers.provider.send("evm_increaseTime", [7 * 24 * 3600]);
+      await ethers.provider.send("evm_increaseTime", [31 * 24 * 3600]); // 31天
       await ethers.provider.send("evm_mine", []);
 
       // 触发开奖
